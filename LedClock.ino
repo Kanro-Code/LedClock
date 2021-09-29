@@ -2,7 +2,8 @@
 #include <FastLED.h>
 
 #define LED_COUNT 83
-#define COL_COUNT 7
+#define ROWS 11
+#define COLS 7
 
 #define LED_PIN 6
 
@@ -29,18 +30,11 @@ void loop() {
     k = 0;
   }
   FastLED.show();
-  delay(100);
+  delay(250);
 }
 
 byte temp[4] = {11, 33, 55, 77};
 
 byte convPos(byte pos) {
-  byte r = pos;
-  for (byte i = 0; i < 4; i++) {
-    if (pos >= temp[i]) {
-      r = r + 2;
-    }
-  }
-  Serial.println("Orignal: " + pos +  " Convert: " + r);
-  return r;
+  return pos + floor((pos+ROWS)/(ROWS*2))*2;
 }
