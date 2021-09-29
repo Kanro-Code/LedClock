@@ -36,5 +36,6 @@ void loop() {
 byte temp[4] = {11, 33, 55, 77};
 
 byte convPos(byte pos) {
-  return pos + floor((pos+ROWS)/(ROWS*2))*2;
+  byte t = pos + floor((pos+ROWS)/(ROWS*2))*2;
+  return t;
 }
