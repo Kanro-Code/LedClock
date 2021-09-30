@@ -1,5 +1,8 @@
+#include <Arduino.h>
 #define FASTLED_ALLOW_INTERRUPTS 0
 #include <FastLED.h>
+
+byte convPos(byte pos);
 
 #define LED_COUNT 83
 #define ROWS 11
@@ -32,8 +35,6 @@ void loop() {
   FastLED.show();
   delay(250);
 }
-
-byte temp[4] = {11, 33, 55, 77};
 
 byte convPos(byte pos) {
   byte t = pos + floor((pos+ROWS)/(ROWS*2))*2;
