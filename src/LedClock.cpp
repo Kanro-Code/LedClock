@@ -4,6 +4,7 @@
 
 byte getPos(byte pos);
 byte mapMinMax(byte v, byte oldMin, byte oldMax, byte newMin, byte newMax);
+void drawNumber(byte number, byte x, byte y);
 
 #define ROWS 11
 #define COLS 7
@@ -44,9 +45,12 @@ void loop() {
   for (byte x = 0; x < COLS; x++) {
     for (byte y = 0; y < ROWS; y++) {
       FastLED.clear();
-      leds[coords[x][y]] = CHSV(random(0,255),random(0,255),random(0,255));
+      leds[coords[x][y]] = CHSV(random(0, 255), random(0, 255), random(0, 255));
+      drawNumber(k, 4, 4);
+      k++;
+      if (k >= 10) k=0;
       FastLED.show();
-      delay(10);
+      delay(1000);
     }
   }
 }
@@ -58,4 +62,27 @@ byte getPos(byte pos) {
 
 byte mapMinMax(byte v, byte oMin, byte oMax, byte nMin, byte nMax) {
   return (nMax - nMin) * (v - oMin) / (oMax - oMin) + nMin;
+}
+
+byte numbers[10][5][3] = {
+  {{1,1,1}, {1,0,1}, {1,0,1},{1,0,1},{1,1,1}},
+  {{0,0,1}, {0,0,1}, {0,0,1},{0,0,1},{0,0,1}},
+  {{1,1,1}, {0,0,1}, {1,1,1},{1,0,0},{1,1,1}},
+  {{1,1,1}, {0,0,1}, {1,1,1},{0,0,1},{1,1,1}},
+  {{1,0,1}, {1,0,1}, {1,1,1},{0,0,1},{0,0,1}},
+  {{1,1,1}, {1,0,0}, {1,1,1},{0,0,1},{1,1,1}},
+  {{1,1,1}, {1,0,0}, {1,1,1},{1,0,1},{1,1,1}},
+  {{1,1,1}, {0,0,1}, {0,0,1},{0,0,1},{0,0,1}},
+  {{1,1,1}, {1,0,1}, {1,1,1},{1,0,1},{1,1,1}},
+  {{1,1,1}, {1,0,1}, {1,1,1},{0,0,1},{1,1,1}}
+};
+
+void drawNumber(byte number, byte x, byte y) {
+  for (byte oY = 0; oY < 5; oY++) {
+    for (byte oX = 0; oX < 3; oX++) {
+      if (numbers[number][x-oX][y+oY] == 1) {
+        leds[coords[x-oX][y+oY]] = CHSV(100,100,100);
+      }
+    }
+  }
 }
