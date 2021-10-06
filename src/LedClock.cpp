@@ -1,6 +1,6 @@
 #include <Arduino.h>
 #include <FastLED.h>
-#include "Timer.cpp"
+#include "Timer.h"
 
 #define FASTLED_ALLOW_INTERRUPTS 0
 
