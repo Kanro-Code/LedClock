@@ -1,5 +1,7 @@
 #include <Arduino.h>
 #include <FastLED.h>
+#include "Timer.cpp"
+
 #define FASTLED_ALLOW_INTERRUPTS 0
 
 byte getPos(byte pos);
