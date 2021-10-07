@@ -1,55 +1,90 @@
 #include "RTClib.h"
+#include <Wire.h>
+
 RTC_DS3231 rtc;
 
-class Timer
-{
+class Timer {
 public:
-  static void init();
-  static void getTime();
-  static void setTime(int t);
-  static void getSerial();
+  void init();
+  DateTime &getTime();
+  boolean summerTime(DateTime &time);
+  void setTime(char *s);
+  void getSerial();
 
 private:
-  int refreshed;
-  int t;
+  unsigned long refresh = 0;
+  DateTime now;
 };
 
-void Timer::getTime()
-{
-  DateTime now = rtc.now();
+void Timer::init() {
+  if (!rtc.begin()) {
+    Serial.println("Couldn't find RTC.");
+    Serial.flush();
+    abort();
+  }
+
+  if (rtc.lostPower()) {
+    Serial.print("RTC reset, set time.");
+    Serial.println("https://www.timeapi.io/api/Time/current/"
+                   "zone?timeZone=Europe/Amsterdam");
+    rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));
+  }
+  now = rtc.now();
+}
+
+DateTime &Timer::getTime() {
+  if (millis() > refresh) {
+    refresh = millis() + 1000;
+    now = rtc.now();
+  }
+
   Serial.print(now.year(), DEC);
   Serial.print('/');
   Serial.print(now.month(), DEC);
   Serial.print('/');
   Serial.print(now.day(), DEC);
-
+  Serial.print(" ");
   Serial.print(now.hour(), DEC);
   Serial.print(':');
   Serial.print(now.minute(), DEC);
   Serial.print(':');
   Serial.print(now.second(), DEC);
+  Serial.print(" Summertime:");
+  Serial.print(summerTime(now));
   Serial.println();
-};
 
-void Timer::init()
-{
-  if (!rtc.begin())
-  {
-    Serial.println("Something is wrong with the RTC module.");
-    Serial.flush();
-    abort();
-  }
-  if (rtc.lostPower()) {
-    Serial.println("RTC lost power, let's set the time!");
-  }
+  return now;
 }
 
-void Timer::setTime(int t)
-{
+// https://www.timeapi.io/api/Time/current/zone?timeZone=UTC -> dateTime
+// 2021-10-07T17:18:11.1731013
+void Timer::setTime(char *str) {
+  DateTime time = str;
+  if (summerTime(time)) {
+  }
+  Serial.println("Setting time:");
+
+  rtc.adjust(time);
 }
 
-void Timer::getSerial()
-{
-  String s = Serial.readString();
-  Serial.println("Received:" + s);
+// If in summertime, clocks are advanced one hour, so that darkness falls later.
+boolean Timer::summerTime(DateTime &time) {
+  if ((time.month() == 3 && time.day() >= 28 && time.hour() >= 1) ||
+      time.month() > 3) {
+    if ((time.month() == 10 && time.day() <= 31 && time.hour() < 1) ||
+        time.month() < 10) {
+      return true;
+    }
+  }
+  return false;
+}
+
+void Timer::getSerial() {
+  String str = Serial.readStringUntil('\n');
+
+  if (str.length() == 27) {
+    char c[27];
+    str.toCharArray(c, 27);
+    setTime(c);
+  }
 }
