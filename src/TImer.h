@@ -1,5 +1,6 @@
 #include "RTClib.h"
 #include <Wire.h>
+#include <EEPROM.h>
 
 RTC_DS3231 rtc;
 
@@ -56,18 +57,21 @@ DateTime &Timer::getTime() {
   return now;
 }
 
-// https://www.timeapi.io/api/Time/current/zone?timeZone=UTC -> dateTime
+// https://www.timeapi.io/api/Time/current/zone?timeZone=Europe/Amsterdam -> dateTime
 // 2021-10-07T17:18:11.1731013
 void Timer::setTime(char *str) {
   DateTime time = str;
-  if (summerTime(time)) {
-  }
   Serial.println("Setting time:");
+rtc.adjust(time);
+  Serial.println(EEPROM.read(0));
+  EEPROM.write(0, summerTime(time));
+  Serial.println(EEPROM.read(0));
 
-  rtc.adjust(time);
+  
 }
 
 // If in summertime, clocks are advanced one hour, so that darkness falls later.
+// This clock is only made for CEST, other timezones might have different triggers.
 boolean Timer::summerTime(DateTime &time) {
   if ((time.month() == 3 && time.day() >= 28 && time.hour() >= 1) ||
       time.month() > 3) {
