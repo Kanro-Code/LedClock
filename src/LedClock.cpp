@@ -1,5 +1,7 @@
+#include "Timer.h"
 #include <Arduino.h>
 #include <FastLED.h>
+
 #define FASTLED_ALLOW_INTERRUPTS 0
 
 byte getPos(byte pos);
@@ -10,13 +12,15 @@ void drawNumber(byte number, byte x, byte y);
 #define COLS 7
 // Sets if the LED strips start at the bottom-left, or top-left.
 #define STARTBOTTOM true
-// Sets how many deadpixels there are at the top of the LEDSTRIP in the turn.
+// Sets how many deadpixels there are lost at the top of the LEDSTRIP in the
+// turn.
 #define DEADPIXELS 2
 #define LED_PIN 6
 #define LEDCOUNT ROWS *COLS + COLS / 2 * DEADPIXELS
 
 byte coords[COLS][ROWS];
 CRGB leds[LEDCOUNT];
+Timer timer;
 
 void setup() {
   Serial.begin(57600);
@@ -38,25 +42,18 @@ void setup() {
       coords[x][y] = swap;
     }
   }
+  timer.init();
 }
 
 byte k = 0;
 void loop() {
-  for (byte x = 0; x < COLS; x++) {
-    for (byte y = 0; y < ROWS; y++) {
-      FastLED.clear();
-      // leds[coords[x][y]] = CHSV(random(0, 255), random(0, 255), random(0, 255));
-      drawNumber(random(0, 9), 0, 0);
-      drawNumber(random(0, 9), 4, 0);
-      drawNumber(random(0, 9), 0, 6);
-      drawNumber(random(0, 9), 4, 6);
-      k++;
-      if (k >= 10)
-        k = 0;
-      FastLED.show();
-      delay(1000);
-    }
+  if (Serial.available()) {
+    timer.getSerial();
   }
+  timer.getTime();
+  timer.print();
+  delay(1000);
+
 }
 
 byte getPos(byte pos) {
@@ -90,12 +87,3 @@ void drawNumber(byte number, byte iX, byte iY) {
     }
   }
 }
-// void drawNumber(byte number, byte x, byte y) {
-//   for (byte oY = 0; oY < 5; oY++) {
-//     for (byte oX = 0; oX < 3; oX++) {
-//       if (numbers[number][x-oX][y+oY] == 1) {
-//         leds[coords[x-oX][y+oY]] = CHSV(0, 255,100);
-//       }
-//     }
-//   }
-// }
