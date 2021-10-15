@@ -4,9 +4,6 @@
 RTC_DS3231 rtc;
 // https://www.timeapi.io/
 
-const int ST_OFFSET = 3600;
-const int TZ_OFFSET_UTC = 3600;
-
 class Timer {
 public:
   void init();
@@ -20,6 +17,8 @@ public:
 private:
   unsigned long lastRefresh = 0;
   DateTime now;
+  const int ST_OFFSET = 3600;
+  const int TZ_OFFSET_UTC = 3600;
 };
 
 void Timer::init() {
