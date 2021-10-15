@@ -50,7 +50,7 @@ void loop() {
   if (Serial.available()) {
     timer.getSerial();
   }
-  DateTime now = timer.getTime();
+  timer.print();
   delay(1000);
 
 }
