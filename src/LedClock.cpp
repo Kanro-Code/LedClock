@@ -1,10 +1,12 @@
+#include "animation.h"
 #include <Arduino.h>
 #include <FastLED.h>
+
 #define FASTLED_ALLOW_INTERRUPTS 0
 
 byte getPos(byte pos);
 byte mapMinMax(byte v, byte oldMin, byte oldMax, byte newMin, byte newMax);
-void drawNumber(byte number, byte x, byte y, CHSV c);
+void drawNumber(byte number, byte pos, CHSV c);
 
 #define ROWS 11
 #define COLS 7
@@ -14,13 +16,23 @@ void drawNumber(byte number, byte x, byte y, CHSV c);
 #define DEADPIXELS 2
 #define LED_PIN 6
 #define LEDCOUNT ROWS *COLS + COLS / 2 * DEADPIXELS
+#define FREQUENCY 100
+#define SPREAD 4
 
 byte coords[COLS][ROWS];
 CRGB leds[LEDCOUNT];
 
+Animation c[4] = {
+    Animation(FREQUENCY, SPREAD * 0), Animation(FREQUENCY, SPREAD * 1),
+    Animation(FREQUENCY, SPREAD * 2), Animation(FREQUENCY, SPREAD * 3)};
+
 void setup() {
   Serial.begin(57600);
   FastLED.addLeds<WS2812B, LED_PIN, GRB>(leds, LEDCOUNT);
+
+  // for (byte i = 0; i < 4; i++) {
+  //   Animation c[i] = Animation(FREQUENCY, SPREAD * i);
+  // }
 
   byte led = 0;
   for (byte x = 0; x < COLS; x++) {
@@ -39,24 +51,13 @@ void setup() {
     }
   }
 }
-
-byte k = 0;
 void loop() {
-  for (byte x = 0; x < COLS; x++) {
-    for (byte y = 0; y < ROWS; y++) {
-      FastLED.clear();
-      // leds[coords[x][y]] = CHSV(random(0, 255), random(0, 255), random(0, 255));
-      CHSV c = CHSV(k,255,100);
-      drawNumber(1, 0, 0, c);
-      drawNumber(2, 4, 0, c);
-      drawNumber(4, 0, 6, c);
-      drawNumber(9, 4, 6, c);
-      k++;
-      if (k >= 255) k = 0;
-      FastLED.show();
-      delay(40 );
+  for (byte i = 0; i < 4; i++) {
+    if (c[i].ready()) {
+      drawNumber(random(0, 9), i, c[i].nextHSV());
     }
   }
+  FastLED.show();
 }
 
 byte getPos(byte pos) {
@@ -80,12 +81,13 @@ byte numbers[10][3][5] = {
     {{1, 1, 1, 1, 1}, {1, 0, 1, 0, 1}, {1, 1, 1, 1, 1}},  // 8
     {{1, 1, 1, 0, 1}, {1, 0, 1, 0, 1}, {1, 1, 1, 1, 1}}}; // 9
 
-byte temp = 0;
-void drawNumber(byte number, byte x, byte y, CHSV c) {
+byte numberCoords[4][2] = {{0, 0}, {4, 0}, {0, 6}, {4, 6}};
+
+void drawNumber(byte number, byte pos, CHSV c) {
   for (byte oY = 0; oY < 5; oY++) {
     for (byte oX = 0; oX < 3; oX++) {
       if (numbers[number][oX][oY] == 1) {
-        byte led = coords[x + oX][y + oY];
+        byte led = coords[numberCoords[pos][0] + oX][numberCoords[pos][1] + oY];
         leds[led] = c;
       }
     }
