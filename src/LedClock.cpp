@@ -15,9 +15,9 @@ void drawNumber(byte number, byte pos, CHSV c);
 // Sets how many deadpixels there are at the top of the LEDSTRIP in the turn.
 #define DEADPIXELS 2
 #define LED_PIN 6
-#define LEDCOUNT ROWS *COLS + COLS / 2 * DEADPIXELS
-#define FREQUENCY 100
-#define SPREAD 4
+#define LEDCOUNT ROWS * COLS + COLS / 2 * DEADPIXELS
+#define FREQUENCY 1000
+#define SPREAD 8
 
 byte coords[COLS][ROWS];
 CRGB leds[LEDCOUNT];
@@ -29,10 +29,6 @@ Animation c[4] = {
 void setup() {
   Serial.begin(57600);
   FastLED.addLeds<WS2812B, LED_PIN, GRB>(leds, LEDCOUNT);
-
-  // for (byte i = 0; i < 4; i++) {
-  //   Animation c[i] = Animation(FREQUENCY, SPREAD * i);
-  // }
 
   byte led = 0;
   for (byte x = 0; x < COLS; x++) {
@@ -53,9 +49,7 @@ void setup() {
 }
 void loop() {
   for (byte i = 0; i < 4; i++) {
-    if (c[i].ready()) {
-      drawNumber(random(0, 9), i, c[i].nextHSV());
-    }
+    drawNumber(random(0, 9), i, c[i].cycleHSV());
   }
   FastLED.show();
 }
@@ -83,13 +77,13 @@ byte numbers[10][3][5] = {
 
 byte numberCoords[4][2] = {{0, 0}, {4, 0}, {0, 6}, {4, 6}};
 
-void drawNumber(byte number, byte pos, CHSV c) {
+void drawNumber(byte digit, byte pos, CHSV c) {
   for (byte oY = 0; oY < 5; oY++) {
     for (byte oX = 0; oX < 3; oX++) {
-      if (numbers[number][oX][oY] == 1) {
-        byte led = coords[numberCoords[pos][0] + oX][numberCoords[pos][1] + oY];
-        leds[led] = c;
-      }
+      byte x = numberCoords[pos][0] + oX;
+      byte y = numberCoords[pos][1] + oY;
+      byte led = coords[x][y];
+      leds[led] = (numbers[digit][oX][oY]) ? c : CHSV();
     }
   }
 }
