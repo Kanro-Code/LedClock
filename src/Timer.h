@@ -19,6 +19,8 @@ private:
   DateTime now;
   const int ST_OFFSET = 3600;
   const int TZ_OFFSET_UTC = 3600;
+  unsigned long prev = 0;
+  unsigned long freq = 0;
 };
 
 void Timer::init() {
@@ -31,7 +33,7 @@ void Timer::init() {
   if (rtc.lostPower()) {
     Serial.print("RTC reset, set time.");
     Serial.println("https://www.timeapi.io/api/Time/current/"
-                   "zone?timeZone=Europe/Amsterdam");
+                   "zone?timeZone=UTC");
     rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));
   }
   refresh(true);
@@ -44,14 +46,14 @@ DateTime &Timer::getTime() {
 
 void Timer::refresh(bool force) {
   if (force) {
-    lastRefresh = millis() + 250;
-    now = rtc.now();
-    now = now + TimeSpan(TZ_OFFSET_UTC);
-    if (dts(now) == true) {
-      now = now + TimeSpan(ST_OFFSET);
+    this->prev = millis() + this->freq;
+    this->now = rtc.now() + TimeSpan(TZ_OFFSET_UTC);
+
+    if (dts(this->now)) {
+      this->now = this->now + TimeSpan(ST_OFFSET);
     }
   } else {
-    if (millis() > lastRefresh) {
+    if (millis() - this->prev >= this->freq) {
       refresh(true);
     }
   }

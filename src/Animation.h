@@ -33,11 +33,10 @@ CHSV Animation::cycleHSV() {
   if (ready()) {
     this->prev = millis();
     byte v = (millis() / freq + offset) % 255;
-    current = CHSV(v, 255, 128);
+    this->current = CHSV(v, 255, 128);
   }
 
   return current;
-
 }
 
 bool Animation::ready() {
