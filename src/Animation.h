@@ -17,6 +17,7 @@ private:
   unsigned long prev = 0;
   unsigned int offset = 0;
   unsigned long freq = 0;
+  byte brightness = 255;
   CHSV current = CHSV(0,0,0);
 };
 

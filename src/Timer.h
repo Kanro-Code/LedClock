@@ -9,7 +9,7 @@ public:
   void init();
   DateTime &getTime();
   void refresh(bool force);
-  bool dst(DateTime &time);
+  bool dts(DateTime &time);
   void setTime(char *s);
   void getSerial();
   void print();
@@ -47,7 +47,7 @@ void Timer::refresh(bool force) {
     lastRefresh = millis() + 250;
     now = rtc.now();
     now = now + TimeSpan(TZ_OFFSET_UTC);
-    if (dst(now) == true) {
+    if (dts(now) == true) {
       now = now + TimeSpan(ST_OFFSET);
     }
   } else {
@@ -66,7 +66,7 @@ void Timer::setTime(char *str) {
   print();
 }
 
-bool Timer::dst(DateTime &t) {
+bool Timer::dts(DateTime &t) {
   if (t.month() < 3 && t.month() > 10) {
     return false;
   } else if (t.month() == 3) {
@@ -92,7 +92,9 @@ bool Timer::dst(DateTime &t) {
 
 void Timer::getSerial() {
   String str = Serial.readStringUntil('\n');
-  Serial.println(str);
+  while (Serial.available()) {
+    Serial.flush();
+  }
   if (str.length() <= 29) {
     char c[29];
     str.toCharArray(c, 29);
