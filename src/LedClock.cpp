@@ -18,8 +18,8 @@ void populateCoords();
 #define DEADPIXELS 2
 #define LED_PIN 6
 #define LEDCOUNT ROWS *COLS + COLS / 2 * DEADPIXELS
-#define FREQUENCY 1000
-#define SPREAD 5
+#define FREQUENCY 100
+#define SPREAD 6
 
 byte coords[COLS][ROWS];
 CRGB leds[LEDCOUNT];
@@ -40,6 +40,8 @@ void loop() {
   if (Serial.available() > 0) {
     timer.getSerial();
   };
+  FastLED.clear();
+
   DateTime t = timer.getTime();
   byte h = t.hour();
   byte m = t.minute();
@@ -49,10 +51,6 @@ void loop() {
   drawNumber(floor(m / 10), 2, c[2].cycleHSV());
   drawNumber(m % 10, 3, c[3].cycleHSV());
 
-  // for (byte i = 0; i < 4; i++) {
-
-  //   drawNumber(random(0, 9), i, c[i].cycleHSV());
-  // }
   FastLED.show();
 }
 
@@ -85,7 +83,9 @@ void drawNumber(byte digit, byte pos, CHSV c) {
       byte x = numberCoords[pos][0] + oX;
       byte y = numberCoords[pos][1] + oY;
       byte led = coords[x][y];
-      leds[led] = (numbers[digit][oX][oY]) ? c : CHSV();
+      if (numbers[digit][oX][oY]) {
+        leds[led] = c;
+      }
     }
   }
 }

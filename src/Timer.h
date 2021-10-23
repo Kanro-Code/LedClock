@@ -8,6 +8,7 @@ class Timer {
 public:
   void init();
   DateTime &getTime();
+  void refresh();
   void refresh(bool force);
   bool dts(DateTime &time);
   void setTime(char *s);
@@ -40,10 +41,11 @@ void Timer::init() {
 }
 
 DateTime &Timer::getTime() {
-  refresh(false);
+  refresh();
   return now;
 }
 
+void Timer::refresh(){ refresh(false); };
 void Timer::refresh(bool force) {
   if (force) {
     this->prev = millis() + this->freq;
@@ -94,7 +96,7 @@ bool Timer::dts(DateTime &t) {
 
 void Timer::getSerial() {
   String str = Serial.readStringUntil('\n');
-  while (Serial.available()) {
+  while (Serial.available() > 0) {
     Serial.flush();
   }
   if (str.length() <= 29) {
