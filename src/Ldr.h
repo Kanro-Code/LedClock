@@ -1,9 +1,9 @@
 #include <Arduino.h>
-#define LOW 50
-#define HIGH 250
-#define GROUPS 10
+#define OUTPUT_LOW 50
+#define OUTPUT_HIGH 250
 #define LDR_LOW 50
 #define LDR_HIGH 450
+#define GROUPS 10
 
 class Ldr
 {
@@ -13,38 +13,43 @@ public:
   uint8_t convReading(int v);
 
 private:
-  uint8_t pin;
-  uint8_t goal = LOW;
+  uint8_t pin, current;
   uint16_t delay;
-  unsigned long last = 0;
-  float correction = (LDR_HIGH - LDR_LOW) / (HIGH - LOW);
+  unsigned long prev = 0;
+  float convFactor = (LDR_HIGH - LDR_LOW) / (OUTPUT_HIGH - OUTPUT_LOW);
+
 };
 
 Ldr::Ldr(uint8_t pin, uint16_t delay)
 {
   this->pin = pin;
   this->delay = delay;
+  average.clear();
 };
 
 uint8_t Ldr::getBuffered()
 {
-  int reading = analogRead(pin);
-  uint8_t value = convReading(reading);
+  if (millis() - prev >= delay)
+  {
+    prev = millis();
+    int reading = analogRead(pin);
+    uint8_t v = convReading(reading);
+    Serial.print("Value:");
+    Serial.print(v);
+  }
 
-
-  return value;
+  return current;
 }
 
 uint8_t Ldr::convReading(int v)
 {
   if (v > LDR_HIGH)
   {
-    return HIGH;
+    return OUTPUT_HIGH;
   }
   else if (v < LDR_LOW)
   {
-    return LOW;
+    return OUTPUT_LOW;
   }
-  v = (v - LDR_LOW) / correction + LDR_LOW;
-  return v;
+  return (v - LDR_LOW) / convFactor + LDR_LOW;
 }

@@ -22,7 +22,7 @@ void populateCoords();
 #define FREQUENCY 100
 #define SPREAD 6
 #define LDR_PORT A1
-#define LDR_DELAY 100
+#define LDR_DELAY 10
 
 byte coords[COLS][ROWS];
 CRGB leds[LEDCOUNT];
@@ -41,7 +41,7 @@ void setup()
 
   timer.init();
 }
-int k = 0;
+
 void loop()
 {
   if (Serial.available() > 0)
