@@ -4,7 +4,8 @@
 RTC_DS3231 rtc;
 // https://www.timeapi.io/
 
-class Timer {
+class Timer
+{
 public:
   void init();
   DateTime &getTime();
@@ -16,7 +17,6 @@ public:
   void print();
 
 private:
-  unsigned long lastRefresh = 0;
   DateTime now;
   const int ST_OFFSET = 3600;
   const int TZ_OFFSET_UTC = 3600;
@@ -24,14 +24,17 @@ private:
   unsigned long freq = 0;
 };
 
-void Timer::init() {
-  if (!rtc.begin()) {
+void Timer::init()
+{
+  if (!rtc.begin())
+  {
     Serial.println("Couldn't find RTC.");
     Serial.flush();
     abort();
   }
 
-  if (rtc.lostPower()) {
+  if (rtc.lostPower())
+  {
     Serial.print("RTC reset, set time.");
     Serial.println("https://www.timeapi.io/api/Time/current/"
                    "zone?timeZone=UTC");
@@ -40,29 +43,37 @@ void Timer::init() {
   refresh(true);
 }
 
-DateTime &Timer::getTime() {
+DateTime &Timer::getTime()
+{
   refresh();
   return now;
 }
 
-void Timer::refresh(){ refresh(false); };
-void Timer::refresh(bool force) {
-  if (force) {
+void Timer::refresh() { refresh(false); };
+void Timer::refresh(bool force)
+{
+  if (force)
+  {
     this->prev = millis() + this->freq;
     this->now = rtc.now() + TimeSpan(TZ_OFFSET_UTC);
 
-    if (dts(this->now)) {
+    if (dts(this->now))
+    {
       this->now = this->now + TimeSpan(ST_OFFSET);
     }
-  } else {
-    if (millis() - this->prev >= this->freq) {
+  }
+  else
+  {
+    if (millis() - this->prev >= this->freq)
+    {
       refresh(true);
     }
   }
 }
 
 // https://www.timeapi.io/api/Time/current/zone?timeZone=UTC
-void Timer::setTime(char *str) {
+void Timer::setTime(char *str)
+{
   DateTime time = str;
   rtc.adjust(time);
   refresh(true);
@@ -70,43 +81,63 @@ void Timer::setTime(char *str) {
   print();
 }
 
-bool Timer::dts(DateTime &t) {
-  if (t.month() < 3 && t.month() > 10) {
+bool Timer::dts(DateTime &t)
+{
+  if (t.month() < 3 && t.month() > 10)
+  {
     return false;
-  } else if (t.month() == 3) {
+  }
+  else if (t.month() == 3)
+  {
     // Lowerbound DST limit > 2021-03-28T01:00:00Z
-    if (t.day() == 28 && t.hour() < 1) {
+    if (t.day() == 28 && t.hour() < 1)
+    {
       return false;
-    } else if (t.day() < 28) {
+    }
+    else if (t.day() < 28)
+    {
       return false;
-    } else {
+    }
+    else
+    {
       return true;
     }
-  } else if (t.month() == 10) {
+  }
+  else if (t.month() == 10)
+  {
     // Upperbound DST limit > 2021-10-31T01:00:00Z
-    if (t.day() == 31 && t.hour() >= 1) {
+    if (t.day() == 31 && t.hour() >= 1)
+    {
       return false;
-    } else {
+    }
+    else
+    {
       return true;
     }
-  } else {
+  }
+  else
+  {
     return true;
   }
 }
 
-void Timer::getSerial() {
+void Timer::getSerial()
+{
   String str = Serial.readStringUntil('\n');
-  while (Serial.available() > 0) {
+  while (Serial.available() > 0)
+  {
     Serial.flush();
   }
-  if (str.length() <= 29) {
+  if (str.length() <= 29)
+  {
     char c[29];
     str.toCharArray(c, 29);
     setTime(c);
   }
 }
 
-void Timer::print() {
+void Timer::print()
+{
   Serial.print(now.year(), DEC);
   Serial.print('/');
   Serial.print(now.month(), DEC);
