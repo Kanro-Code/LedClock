@@ -58,8 +58,8 @@ void loop()
   drawNumber(h % 10, 1, c[1].cycleHSV());
   drawNumber(floor(m / 10), 2, c[2].cycleHSV());
   drawNumber(m % 10, 3, c[3].cycleHSV());
+  
   FastLED.setBrightness(ldr.getBuffered());
-
   FastLED.show();
 }
 

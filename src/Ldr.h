@@ -3,7 +3,6 @@
 #define OUTPUT_HIGH 250
 #define LDR_LOW 50
 #define LDR_HIGH 450
-#define GROUPS 10
 
 class Ldr
 {
@@ -24,7 +23,6 @@ Ldr::Ldr(uint8_t pin, uint16_t delay)
 {
   this->pin = pin;
   this->delay = delay;
-  average.clear();
 };
 
 uint8_t Ldr::getBuffered()
@@ -34,8 +32,17 @@ uint8_t Ldr::getBuffered()
     prev = millis();
     int reading = analogRead(pin);
     uint8_t v = convReading(reading);
-    Serial.print("Value:");
+    int8_t diff = (v - current);
+    if (diff > 10 && current <= HIGH) {
+      current++;
+    } else if (diff < -10 && current >= LOW) {
+      current--;
+    }
+    Serial.print("v:");
     Serial.print(v);
+    // current = current + ((v > current) ? 1 : -1);
+    Serial.print(" C:");
+    Serial.println(current);
   }
 
   return current;
